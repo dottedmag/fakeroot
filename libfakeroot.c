@@ -110,8 +110,16 @@
 #define INT_NEXT_FSTATAT(a,b,c,d) NEXT_FSTATAT(_STAT_VER,a,b,c,d)
 #define INT_SEND_STAT(a,b) SEND_STAT(a,b,_STAT_VER)
 #define INT_SEND_GET_XATTR(a,b) SEND_GET_XATTR(a,b,_STAT_VER)
+
+/* 10.10 uses id_t in getpriority/setpriority calls, so pretend
+   id_t is used everywhere, just happens to be int on some OSes */
+#ifndef _ID_T
+#define _ID_T
+typedef int id_t;
+#endif
 #endif
 
+#include <sys/types.h>
 #include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -123,7 +131,6 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
-#include <sys/types.h>
 #ifdef HAVE_SYS_ACL_H
 #include <sys/acl.h>
 #endif /* HAVE_SYS_ACL_H */
@@ -1894,7 +1901,7 @@ ssize_t fremovexattr(int fd, const char *name)
 }
 #endif /* HAVE_FREMOVEXATTR */
 
-int setpriority(int which, int who, int prio){
+int setpriority(int which, id_t who, int prio){
   if (fakeroot_disabled)
     return next_setpriority(which, who, prio);
   next_setpriority(which, who, prio);
