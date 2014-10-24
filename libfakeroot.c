@@ -2426,3 +2426,19 @@ int sysinfo(int command, char *buf, long count)
     }
 }
 #endif
+
+#ifdef HAVE_OPENAT
+int openat(int dir_fd, const char *pathname, int flags, ...)
+{
+    if (flags & O_CREAT)
+    {
+        va_list args;
+        mode_t mode;
+        va_start(args, flags);
+        mode = va_arg(args, int);
+        va_end(args);
+        return next_openat(dir_fd, pathname, flags, mode);
+    }
+    return next_openat(dir_fd, pathname, flags);
+}
+#endif
